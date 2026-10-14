@@ -1,7 +1,10 @@
 // Where each image, font and video is served from.
-// Leave "" to serve the file from this project's public/assets/ folder.
-// If AI Studio can't host files, upload them to the GHL Media Library and paste
-// each file's link here — nothing else needs changing.
+// By default they load from this project's public GitHub repo via the jsDelivr CDN,
+// so they work even if the host doesn't copy the image files over.
+// To serve a file from somewhere else (e.g. the GHL Media Library), paste its link
+// next to its name below — nothing else needs changing.
+export const ASSET_BASE = "https://cdn.jsdelivr.net/gh/TryEmmaAI/double-n-services-website@main/public/assets/";
+
 export const ASSET_URLS: Record<string, string> = {
   "fonts/archivo.woff2": "",
   "fonts/newsreader.woff2": "",
@@ -53,7 +56,7 @@ export const ASSET_URLS: Record<string, string> = {
 };
 
 export function assetUrl(file: string): string {
-  return ASSET_URLS[file] || "/assets/" + file;
+  return ASSET_URLS[file] || ASSET_BASE + file;
 }
 
 export function rewriteAssets(markup: string): string {
