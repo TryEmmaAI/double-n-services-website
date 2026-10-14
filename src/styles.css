@@ -1851,3 +1851,27 @@ a.alertbar:hover .alert-cta { border-bottom-color: #fff; }
 .city-cloud li.is-hq:has(a) { color: #fff; border-color: var(--walnut); }
 .faq-item .answer a { color: var(--green-deep); font-variation-settings: "wdth" 100, "wght" 620; }
 .hdr-phone .v { white-space: nowrap; }
+
+/* ---------- Residential & commercial ---------- */
+.sect--tight-top { padding-top: 0; }
+.both { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr) minmax(0, 1fr); gap: clamp(16px, 2vw, 28px); align-items: stretch;
+  border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--paper); padding: clamp(24px, 3vw, 40px); box-shadow: var(--shadow-sm); }
+.both-head { align-self: center; }
+.both-head h2 { margin-bottom: 12px; }
+.both-head .lede { margin: 0; font-size: 16.5px; }
+.both-card { display: flex; flex-direction: column; border-radius: var(--r-md); background: var(--concrete); padding: 22px 22px 20px; }
+.both-card--biz { background: var(--walnut); color: #fff; }
+.both-card h3 { font-size: 1.32rem; margin-bottom: 14px; }
+.both-card--biz h3 { color: #fff; }
+.both-card .check-list { margin-bottom: 20px; gap: 10px; }
+.both-card .check-list li { font-size: 15px; }
+.both-card--biz .check-list li { color: rgba(255, 255, 255, 0.86); }
+.both-card--biz .check-list .ic { background: rgba(140, 198, 63, 0.18); color: var(--green-bright); }
+.both-card .btn { margin-top: auto; align-self: flex-start; }
+.both-card--biz .btn--phone { background: #fff; color: var(--walnut); }
+.both-card--biz .btn--phone:hover { background: var(--green-bright); }
+.hero-proof li.both-badge { padding: 3px 11px; border: 1px solid rgba(140, 198, 63, 0.55); border-radius: 999px; background: rgba(140, 198, 63, 0.12); }
+.hero-proof li.both-badge strong { color: var(--green-bright); }
+.wiz-prop { margin-bottom: 14px; }
+@media (max-width: 1080px) { .both { grid-template-columns: 1fr 1fr; } .both-head { grid-column: 1 / -1; } }
+@media (max-width: 640px) { .both { grid-template-columns: 1fr; } }

@@ -274,7 +274,7 @@ export function initSite(): void {
         syncGroups();
       }
       render();
-      if (byPointer && e.target.type === 'radio' && e.target.name !== 'contact' && stepValid()) {
+      if (byPointer && e.target.type === 'radio' && e.target.name !== 'contact' && e.target.name !== 'property' && stepValid()) {
         var from = at; // ignore if Continue was already pressed in the meantime
         setTimeout(function () { if (at === from) go(at + 1); }, 220);
       }
@@ -289,6 +289,14 @@ export function initSite(): void {
 
     syncGroups();
     render();
+
+    // "Get a commercial estimate" style links: pre-pick Home/Business, then jump to the form.
+    $$('[data-property]').forEach(function (a) {
+      a.addEventListener('click', function () {
+        var r = $('input[name="property"][value="' + a.getAttribute('data-property') + '"]', form);
+        if (r) r.checked = true;
+      });
+    });
   }
 
   /* ---- Keep the GHL chat widget clear of the mobile call bar ----
