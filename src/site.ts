@@ -280,11 +280,21 @@ export function initSite(): void {
       }
     });
 
+    // Sends the answers to Double N's GHL inbound webhook (set in build.py FACTS).
+    // Form-encoded + no-cors: a "simple" request browsers allow cross-site without
+    // a CORS preflight. Until a webhook is set, the form says so and asks people to call.
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       if (!form.reportValidity()) return;
-      // TODO(GHL): POST new FormData(form) to the inbound webhook.
-      $('#estimate').classList.add('is-sent');
+      var card = $('#estimate');
+      var hook = form.getAttribute('data-webhook');
+      if (!hook) { card.classList.add('is-offline'); return; }
+      var body = new URLSearchParams();
+      new FormData(form).forEach(function (v, k) { body.append(k, v); });
+      sendBtn.disabled = true;
+      fetch(hook, { method: 'POST', mode: 'no-cors', body: body })
+        .then(function () { card.classList.add('is-sent'); })
+        .catch(function () { sendBtn.disabled = false; card.classList.add('is-offline'); });
     });
 
     syncGroups();

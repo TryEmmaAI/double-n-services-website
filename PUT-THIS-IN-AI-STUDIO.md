@@ -51,7 +51,7 @@ its name. For example:
 
 Nothing else needs to change. Every image, font and video picks up the new link automatically.
 
-## Step 4 — Publish, then check these 5 things on the preview link
+## Step 4 — Publish, then check these 6 things on the preview link
 
 1. Home page loads with the hero video and the Newsreader headings.
 2. **Services** menu opens; click **Hardwood flooring** → the page loads at `/hardwood-flooring/`.
@@ -59,15 +59,19 @@ Nothing else needs to change. Every image, font and video picks up the new link 
    *"Every URL path must serve index.html — add the single-page app fallback."*
 4. Estimate form: pick **Cleaning** → step 2 shows Carpet / Couch or chairs / … .
 5. **Our work** → filter buttons work.
+6. **Search engines see the content:** open any page, right-click → **View page source**. You
+   should see the page's text and its title in the source, not just `<div id="root"></div>`.
+   The build writes a real HTML file per page (`vite.config.ts` → "prerender"). If the source
+   is empty, AI Studio isn't running the project's own `vite build`: ask it to
+   *"build with `npm run build` and serve the `dist` folder as static files"*.
 
 ## Before go-live (same as the static site)
 
 - **Chat widget:** `index.html` still has TryEmma's widget id. Swap `data-widget-id` for Double N's.
-- **Estimate form:** submissions still stop in the browser. Point it at Double N's GHL webhook
-  (the `TODO(GHL)` line in `src/site.ts`).
-- **SEO:** this version builds each page's title and meta in the browser. Google handles that,
-  but turning on AI Studio's **server-side rendering** (Project Settings) is better for search
-  and AI answer engines. Test it on a copy first, as AI Studio itself recommends.
+- **Estimate form:** until a webhook is set, the form tells visitors to call instead of sending.
+  To switch it on, create a GHL workflow with an **Inbound Webhook** trigger, copy its URL into
+  `"webhook"` in `double-n-site/_build/build.py`, re-run the build + export, push, and send one
+  test lead to confirm it lands in GHL.
 
 ## Changing content later
 

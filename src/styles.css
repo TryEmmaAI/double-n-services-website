@@ -1875,3 +1875,6 @@ a.alertbar:hover .alert-cta { border-bottom-color: #fff; }
 .wiz-prop { margin-bottom: 14px; }
 @media (max-width: 1080px) { .both { grid-template-columns: 1fr 1fr; } .both-head { grid-column: 1 / -1; } }
 @media (max-width: 640px) { .both { grid-template-columns: 1fr; } }
+.form-off { display: none; margin: 14px 0 0; padding: 12px 14px; border-radius: 9px; background: rgba(196, 71, 28, 0.08); border: 1px solid rgba(196, 71, 28, 0.24); color: var(--rust-deep); font-size: 14.5px; font-variation-settings: "wdth" 96, "wght" 600; }
+.form-off a { color: inherit; }
+.is-offline .form-off { display: block; }

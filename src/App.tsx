@@ -20,7 +20,7 @@ function applyHead(page: Page) {
   for (const [key, name, content] of page.meta) {
     const m = document.createElement("meta");
     m.setAttribute(key, name);
-    m.setAttribute("content", content);
+    m.setAttribute("content", rewriteAssets(content));
     add(m);
   }
   const canonical = document.createElement("link");
@@ -31,7 +31,7 @@ function applyHead(page: Page) {
   }
   for (const json of page.jsonld) {
     const s = document.createElement("script");
-    s.type = "application/ld+json"; s.textContent = json; add(s);
+    s.type = "application/ld+json"; s.textContent = rewriteAssets(json); add(s);
   }
   const icon = document.createElement("link");
   icon.rel = "icon"; icon.href = assetUrl("img/favicon.webp"); add(icon);
@@ -51,6 +51,10 @@ export default function App() {
     if (!page) return;
     if (page.redirect) { window.location.replace(page.redirect); return; }
     applyHead(page);
+    if (!pages[currentPath()]) { // unknown URL: show the homepage, but keep it out of search
+      const m = document.createElement("meta");
+      m.name = "robots"; m.content = "noindex"; m.setAttribute("data-page-head", ""); document.head.appendChild(m);
+    }
     initSite();
     if (window.location.hash) document.querySelector(window.location.hash)?.scrollIntoView();
   }, [page]);
