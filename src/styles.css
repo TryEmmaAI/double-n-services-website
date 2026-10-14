@@ -1872,7 +1872,14 @@ a.alertbar:hover .alert-cta { border-bottom-color: #fff; }
 .both-card--biz .btn--phone:hover { background: var(--green-bright); }
 .hero-proof li.both-badge { padding: 3px 11px; border: 1px solid rgba(140, 198, 63, 0.55); border-radius: 999px; background: rgba(140, 198, 63, 0.12); }
 .hero-proof li.both-badge strong { color: var(--green-bright); }
-.wiz-prop { margin-bottom: 14px; }
+.prop-pick { border: 0; padding: 0; margin: 10px 0 14px; min-inline-size: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.prop { position: relative; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 9px; padding: 12px 10px;
+  border: 1.5px solid var(--line-strong); border-radius: 12px; color: var(--ink-mid); transition: border-color 0.16s var(--ease), background-color 0.16s var(--ease), color 0.16s var(--ease); }
+.prop input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.prop span { font-size: 15.5px; font-variation-settings: "wdth" 98, "wght" 650; }
+.prop:hover { border-color: var(--walnut); }
+.prop:has(input:checked) { border-color: var(--green); background: var(--mint); color: var(--green-deep); }
+.prop:has(input:focus-visible) { outline: 3px solid var(--green); outline-offset: 2px; }
 @media (max-width: 1080px) { .both { grid-template-columns: 1fr 1fr; } .both-head { grid-column: 1 / -1; } }
 @media (max-width: 640px) { .both { grid-template-columns: 1fr; } }
 .form-off { display: none; margin: 14px 0 0; padding: 12px 14px; border-radius: 9px; background: rgba(196, 71, 28, 0.08); border: 1px solid rgba(196, 71, 28, 0.24); color: var(--rust-deep); font-size: 14.5px; font-variation-settings: "wdth" 96, "wght" 600; }
