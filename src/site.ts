@@ -1,5 +1,5 @@
 // @ts-nocheck — main.js from the static site, unchanged apart from this wrapper.
-/* Double N Services — interactions. No dependencies. */
+/* Double N Services: interactions. No dependencies. */
 export function initSite(): void {
   'use strict';
 
@@ -53,14 +53,14 @@ export function initSite(): void {
       desc: 'LVP is the floor we install most often now, and for good reason: it handles spills, dogs, kids and basements without swelling, and modern planks are hard to tell from real timber.',
       best: 'Kitchens, basements, rentals',
       also: 'Whole-home single level',
-      job: 'Often done in 1–2 days',
+      job: 'Often done in 1-2 days',
       cta: 'Price my vinyl floor'
     },
     carpet: {
       page: 'carpet-installation/', more: 'Everything about carpet installation',
       kicker: 'Carpet',
       title: 'Carpet, including the awkward rooms',
-      desc: 'We help you choose it, measure it and lay it — bedrooms, stairs, landings and closets included. If a crew has ever told you a staircase was "too tricky," that is the part we do properly.',
+      desc: 'We help you choose it, measure it and lay it: bedrooms, stairs, landings and closets included. If a crew has ever told you a staircase was "too tricky," that is the part we do properly.',
       best: 'Bedrooms, stairs, basements',
       also: 'Repairs & re-stretching',
       job: 'Most homes in a day',
@@ -70,7 +70,7 @@ export function initSite(): void {
       page: 'tile-flooring/', more: 'Everything about tile floors',
       kicker: 'Tile & grout',
       title: 'Tile laid straight, grout that stays clean',
-      desc: 'Tile installation and repair for bathrooms, kitchens and entryways — plus grout cleaning and re-grouting, which is often all an older bathroom actually needs.',
+      desc: 'Tile installation and repair for bathrooms, kitchens and entryways, plus grout cleaning and re-grouting, which is often all an older bathroom actually needs.',
       best: 'Bathrooms, kitchens, entries',
       also: 'Re-grout & deep clean',
       job: 'Sized to the room',
@@ -90,8 +90,8 @@ export function initSite(): void {
       page: 'carpets-upholstery/', more: 'How our cleaning works',
       kicker: 'Cleaning',
       title: 'Carpet, upholstery and pet odor',
-      desc: 'Our DNS Low Moisture Green & Clean System® — bio-active citrus cleaners, truck-mounted extraction and a quick-dry finish — for carpet, sofas, mattresses and leather, plus pet stain and odor removal. Our most reviewed service.',
-      best: 'Every 6–12 months',
+      desc: 'Our DNS Low Moisture Green & Clean System® (bio-active citrus cleaners, truck-mounted extraction and a quick-dry finish) for carpet, sofas, mattresses and leather, plus pet stain and odor removal. Our most reviewed service.',
+      best: 'Every 6-12 months',
       also: 'Air ducts, tile & grout',
       job: 'Usually a single visit',
       cta: 'Book a cleaning'
@@ -312,7 +312,7 @@ export function initSite(): void {
   /* ---- Keep the GHL chat widget clear of the mobile call bar ----
      The widget positions itself inside a shadow root, so page CSS can't reach
      it. We inject one rule instead. On Double N's own widget this is better set
-     as the mobile offset in the GHL widget settings — this is the demo fix. */
+     as the mobile offset in the GHL widget settings. This is the demo fix. */
   (function liftChatWidget() {
     var tries = 0;
     var timer = setInterval(function () {
