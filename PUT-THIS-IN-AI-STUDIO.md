@@ -67,7 +67,7 @@ Nothing else needs to change. Every image, font and video picks up the new link 
 
 ## Before go-live (same as the static site)
 
-- **Chat widget:** `index.html` still has TryEmma's widget id. Swap `data-widget-id` for Double N's.
+- **Chat widget:** Double N's own widget (`6adb9821c9aed815ed55508f`) is loaded by `src/site.ts`, so it works even though AI Studio replaces `index.html`. To change it, edit the id in `double-n-site/assets/js/main.js` and re-export.
 - **Estimate form:** until a webhook is set, the form tells visitors to call instead of sending.
   To switch it on, create a GHL workflow with an **Inbound Webhook** trigger, copy its URL into
   `"webhook"` in `double-n-site/_build/build.py`, re-run the build + export, push, and send one
