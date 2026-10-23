@@ -8,6 +8,7 @@ export const ASSET_BASE = "https://cdn.jsdelivr.net/gh/TryEmmaAI/double-n-servic
 export const ASSET_URLS: Record<string, string> = {
   "fonts/archivo.woff2": "",
   "fonts/newsreader.woff2": "",
+  "img/clean-split.jpg": "",
   "img/favicon.webp": "",
   "img/g1.webp": "",
   "img/g11.webp": "",
@@ -48,7 +49,6 @@ export const ASSET_URLS: Record<string, string> = {
   "img/n-tile-shower-niche.jpg": "",
   "img/n-tile-shower-pebble.jpg": "",
   "img/n-tile-tearout.jpg": "",
-  "img/p12.webp": "",
   "img/p45.webp": "",
   "img/p47.webp": "",
   "img/p49.webp": "",
