@@ -144,16 +144,73 @@ export function initSite(): void {
     });
   });
 
-  /* ---- Gallery filters ---- */
-  var chips = $$('.chip');
-  var items = $$('.gal-item');
-  chips.forEach(function (chip) {
-    chip.addEventListener('click', function () {
-      var f = chip.getAttribute('data-filter');
-      chips.forEach(function (c) { c.setAttribute('aria-pressed', String(c === chip)); });
-      items.forEach(function (it) {
-        it.classList.toggle('is-hidden', f !== 'all' && it.getAttribute('data-cat') !== f);
+  /* ---- Sliders: arrow buttons scroll one "page"; they dim at either end ---- */
+  $$('.slider').forEach(function (s) {
+    var track = $('.slider-track', s);
+    var btns = $$('.slider-btn', s);
+    function ends() {
+      var max = track.scrollWidth - track.clientWidth - 2;
+      btns[0].disabled = track.scrollLeft <= 2;
+      btns[1].disabled = track.scrollLeft >= max;
+      s.classList.toggle('is-static', max <= 0);
+    }
+    btns.forEach(function (b) {
+      b.addEventListener('click', function () {
+        track.scrollBy({ left: Number(b.getAttribute('data-dir')) * track.clientWidth * 0.85, behavior: 'smooth' });
       });
+    });
+    track.addEventListener('scroll', ends, { passive: true });
+    window.addEventListener('resize', ends);
+    ends();
+  });
+
+  /* ---- Reviews: long quotes are clipped to 5 lines with a "Read more" ---- */
+  var es = document.documentElement.lang === 'es';
+  $$('.slider--rev .rev').forEach(function (card) {
+    var q = $('blockquote', card);
+    if (q.scrollHeight <= q.clientHeight + 2) return;
+    var b = document.createElement('button');
+    b.type = 'button'; b.className = 'rev-more';
+    b.textContent = es ? 'Leer más' : 'Read more';
+    b.addEventListener('click', function () {
+      var open = card.classList.toggle('is-open');
+      b.textContent = open ? (es ? 'Leer menos' : 'Show less') : (es ? 'Leer más' : 'Read more');
+    });
+    card.appendChild(b);
+  });
+
+  /* ---- Our work: service tabs show one row at a time ---- */
+  var wtabs = $$('.work-tab');
+  wtabs.forEach(function (t, i) {
+    t.addEventListener('click', function () {
+      wtabs.forEach(function (o) {
+        var on = o === t;
+        o.setAttribute('aria-selected', String(on));
+        document.getElementById(o.getAttribute('aria-controls')).hidden = !on;
+      });
+      window.dispatchEvent(new Event('resize')); // re-check slider ends for the shown row
+    });
+    t.addEventListener('keydown', function (e) {
+      var d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+      if (!d) return;
+      var n = wtabs[(i + d + wtabs.length) % wtabs.length];
+      n.focus(); n.click();
+    });
+  });
+
+  /* ---- Before/after: the range input moves the divide ---- */
+  $$('.ba-compare').forEach(function (box) {
+    var r = $('input[type="range"]', box), handle = $('.ba-handle', box);
+    function set(v) { v = Math.max(0, Math.min(100, v)); box.style.setProperty('--pos', v + '%'); r.value = v; }
+    r.addEventListener('input', function () { set(Number(r.value)); });
+    // Drag the handle only, so a swipe elsewhere on the photo still scrolls the row.
+    handle.addEventListener('pointerdown', function (e) {
+      handle.setPointerCapture(e.pointerId);
+      function move(ev) { var b = box.getBoundingClientRect(); set((ev.clientX - b.left) / b.width * 100); }
+      function up() { handle.removeEventListener('pointermove', move); handle.removeEventListener('pointerup', up); }
+      handle.addEventListener('pointermove', move);
+      handle.addEventListener('pointerup', up);
+      e.preventDefault();
     });
   });
 
