@@ -1076,7 +1076,7 @@ a.alertbar:hover .alert-cta { border-bottom-color: #fff; }
 
 /* Restoration — the wide, dark, urgent one */
 .svc--wide {
-  grid-column: span 3;
+  margin-top: clamp(16px, 1.8vw, 24px); /* sits under the grid, not in it, so the phone swipe row stays card-height */
   flex-direction: row;
   background: var(--walnut);
   border-color: transparent;
@@ -1549,7 +1549,6 @@ a.alertbar:hover .alert-cta { border-bottom-color: #fff; }
   .faq-shell, .area-shell, .promise { grid-template-columns: 1fr; }
   .faq-aside { position: static; }
   .svc-grid { grid-template-columns: repeat(2, 1fr); }
-  .svc--wide { grid-column: span 2; }
   .rev-grid { grid-template-columns: 1fr; }
   .gal-grid { grid-template-columns: repeat(3, 1fr); }
   .ftr-grid { grid-template-columns: 1fr 1fr; }
@@ -1922,9 +1921,17 @@ a.alertbar:hover .alert-cta { border-bottom-color: #fff; }
   }
   .svc-grid::-webkit-scrollbar, .steps::-webkit-scrollbar, .post-list::-webkit-scrollbar { display: none; }
   .svc-grid > *, .steps > li, .post-list > * { flex: 0 0 84%; scroll-snap-align: start; }
+  /* Emergency band: compact and always visible on phones, not a 7th swipe card */
   .svc--wide { flex-direction: column; }
-  .svc--wide .svc-media { aspect-ratio: 16 / 10; }
-  .svc--wide .svc-body { padding: 22px 24px 26px; }
+  .svc--wide .svc-media { aspect-ratio: 21 / 8; }
+  .svc--wide .svc-body { padding: 18px 20px 20px; }
+  .svc--wide h3 { font-size: 1.35rem; margin-bottom: 8px; }
+  .svc--wide p { font-size: 15px; margin-bottom: 14px; }
+  .svc--wide .tagset { margin-bottom: 10px; }
+  .svc--wide .tagset .tag:not(.tag--rust) { display: none; }
+  .svc-grid { align-items: stretch; } /* equal-height cards now the tall emergency card is out of the row */
+  .svc--wide .actions { gap: 8px; }
+  .svc--wide .actions .btn { flex: 1 1 100%; justify-content: center; }
 }
 @media (max-width: 640px) {
   .hero-awards { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 18px; }
