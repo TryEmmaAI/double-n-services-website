@@ -879,6 +879,13 @@ a.alertbar:hover .alert-cta { border-bottom-color: #fff; }
 .sect--dark { background: var(--walnut); color: #fff; }
 .sect--dark h2, .sect--dark h3 { color: #fff; }
 .sect--paper { background: var(--paper); }
+/* Two neighbouring sections on the same background would stack both paddings
+   (~230px on desktop). The second one starts closer. */
+.sect:not(.sect--paper, .sect--dark, .cta-band, .sect--tight, .sect--tight-top) + .sect:not(.sect--paper, .sect--dark, .cta-band, .sect--tight, .sect--tight-top),
+.sect--paper + .sect--paper:not(.sect--tight, .sect--tight-top) { padding-top: calc(var(--sect) * 0.4); }
+/* Same idea across a thin divider line: pull both sides in. */
+.sect:has(+ .wrap > .seam) { padding-bottom: calc(var(--sect) * 0.6); }
+.wrap:has(> .seam) + .sect { padding-top: calc(var(--sect) * 0.6); }
 
 .sect-head { max-width: 62ch; margin-bottom: clamp(36px, 4vw, 56px); }
 .sect-head--center { margin-inline: auto; text-align: center; }
@@ -1425,8 +1432,9 @@ a.alertbar:hover .alert-cta { border-bottom-color: #fff; }
 .cta-actions { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; }
 .cta-band .btn--primary { background: #fff; color: var(--green-deep); box-shadow: 0 2px 0 rgba(0,0,0,0.14); }
 .cta-band .btn--primary:hover { background: var(--walnut); color: #fff; }
-.cta-fine {
-  margin: 26px 0 0;
+.cta-band .cta-fine { /* .cta-band p would otherwise zero the top margin */
+  margin: 28px auto 0;
+  max-width: none;
   font-size: 13.5px;
   color: rgba(255, 255, 255, 0.78);
 }
