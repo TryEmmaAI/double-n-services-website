@@ -1608,7 +1608,10 @@ a.alertbar:hover .alert-cta { border-bottom-color: #fff; }
   .gal-item--wide { grid-column: span 2; }
   .gal-item--tall { grid-row: span 1; }
   .gal-item--tall img { aspect-ratio: 1 / 1; }
-  .ftr-grid { grid-template-columns: 1fr; }
+  /* Brand and contact full width; Services sits beside Service area + More */
+  .ftr-grid { grid-template-columns: 1fr 1fr; gap: 32px 20px; }
+  .ftr-grid > :first-child, .ftr-grid > :last-child { grid-column: 1 / -1; }
+  .ftr ul { gap: 10px; font-size: 14.5px; }
   .field-row { grid-template-columns: 1fr; }
   .hero-actions .btn { width: 100%; }
   .cta-actions .btn { width: 100%; }
