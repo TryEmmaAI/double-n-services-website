@@ -236,14 +236,17 @@ export function initSite(): void {
   /* ---- Estimate wizard ----
      Step 1 picks the kind of job; steps 2 and 3 only show the group of
      questions for that job (hidden groups are disabled so they're neither
-     validated nor submitted). Radios auto-advance when tapped, not when
-     arrow-keyed, so keyboard users aren't thrown forward. */
+     validated nor submitted). Room chips follow Home/Business, and a step with
+     data-skip-if is skipped when every ticked service is in that list (a couch
+     or duct clean doesn't need rooms). Radios auto-advance when tapped, not
+     when arrow-keyed, so keyboard users aren't thrown forward. */
   var form = $('#quoteForm');
   if (form) {
     var steps = $$('.wiz-step', form);
     var bars = $$('.wiz-bar i');
     var barWrap = $('.wiz-bar');
     var nowEl = $('#wizNow');
+    var totalEl = $('#wizTotal');
     var backBtn = $('#wizBack');
     var nextBtn = $('#wizNext');
     var sendBtn = $('#wizSend');
@@ -258,14 +261,36 @@ export function initSite(): void {
       return j ? j.value : '';
     }
 
-    // Show only the groups whose data-for lists the chosen job.
+    function prop() {
+      var p = $('input[name="property"]:checked', form);
+      return p ? p.value : '';
+    }
+
+    // Show only the groups whose data-for lists the chosen job, and the room
+    // chips for the chosen property type.
     function syncGroups() {
-      var j = job();
+      var j = job(), pr = prop();
       $$('.wiz-group', form).forEach(function (g) {
         var on = (' ' + g.getAttribute('data-for') + ' ').indexOf(' ' + j + ' ') > -1;
         g.hidden = !on;
         $$('input', g).forEach(function (i) { i.disabled = !on; });
       });
+      $$('[data-prop]', form).forEach(function (c) {
+        var on = c.getAttribute('data-prop') === pr;
+        c.hidden = !on;
+        $('input', c).disabled = !on;
+      });
+    }
+
+    function skipped(s) {
+      var list = s.getAttribute('data-skip-if');
+      if (!list) return false;
+      var ticked = $$('input[name="service"]:checked:not(:disabled)', form);
+      return ticked.length > 0 && ticked.every(function (i) { return list.split('|').indexOf(i.value) > -1; });
+    }
+    // The steps this visitor actually gets, as indexes into steps[].
+    function seq() {
+      return steps.map(function (s, i) { return i; }).filter(function (i) { return !skipped(steps[i]); });
     }
 
     function showErr(msg) {
@@ -286,16 +311,17 @@ export function initSite(): void {
 
     function stepValid() {
       var s = steps[at];
-      var name = at === 0 ? 'job' : at === 3 ? 'timing' : null;
+      var n = s.getAttribute('data-step');
+      var name = n === '1' ? 'job' : n === '4' ? 'timing' : null;
       if (name && !$('input[name="' + name + '"]:checked:not(:disabled)', s)) {
         showErr(form.getAttribute('data-err-pick'));
         return false;
       }
-      if (at === 2 && !$('input[name="rooms"]:checked:not(:disabled)', s) && !$('#q-sqft', s).value.trim()) {
+      if (n === '3' && !$('input[name="rooms"]:checked:not(:disabled)', s) && !$('#q-sqft', s).value.trim()) {
         showErr(form.getAttribute('data-err-rooms'));
         return false;
       }
-      if (at === 1 && !$('input[name="service"]:checked:not(:disabled)', s)) {
+      if (n === '2' && !$('input[name="service"]:checked:not(:disabled)', s)) {
         showErr(form.getAttribute('data-err-tick'));
         return false;
       }
@@ -304,40 +330,46 @@ export function initSite(): void {
     }
 
     function render() {
+      var order = seq(), pos = order.indexOf(at);
       steps.forEach(function (s, i) { s.classList.toggle('is-active', i === at); });
-      bars.forEach(function (b, i) { b.classList.toggle('is-on', i <= at); });
-      barWrap.setAttribute('aria-valuenow', String(at + 1));
-      nowEl.textContent = String(at + 1);
+      bars.forEach(function (b, i) { b.hidden = i >= order.length; b.classList.toggle('is-on', i <= pos); });
+      barWrap.setAttribute('aria-valuenow', String(pos + 1));
+      barWrap.setAttribute('aria-valuemax', String(order.length));
+      nowEl.textContent = String(pos + 1);
+      totalEl.textContent = String(order.length);
       backBtn.hidden = at === 0;
       var last = at === steps.length - 1;
       nextBtn.hidden = last;
       sendBtn.hidden = !last;
     }
 
-    function go(n) {
-      at = Math.max(0, Math.min(n, steps.length - 1));
+    // Move by dir (+1 / -1) through the steps that apply.
+    function go(dir) {
+      var order = seq(), pos = order.indexOf(at);
+      at = order[Math.max(0, Math.min(pos + dir, order.length - 1))];
       syncGroups();
       render();
       var q = $('.wiz-group:not([hidden]) .wiz-q', steps[at]) || $('.wiz-q', steps[at]);
       if (q) { q.setAttribute('tabindex', '-1'); q.focus({ preventScroll: true }); }
     }
 
-    nextBtn.addEventListener('click', function () { if (stepValid()) go(at + 1); });
-    backBtn.addEventListener('click', function () { clearErr(); go(at - 1); });
+    nextBtn.addEventListener('click', function () { if (stepValid()) go(1); });
+    backBtn.addEventListener('click', function () { clearErr(); go(-1); });
 
     form.addEventListener('pointerdown', function () { byPointer = true; });
     form.addEventListener('keydown', function () { byPointer = false; });
     form.addEventListener('change', function (e) {
       clearErr();
-      if (e.target.name === 'job') {
-        // Changing the job clears answers that belonged to the old one.
-        $$('input[name="service"], input[name="rooms"]', form).forEach(function (i) { i.checked = false; });
+      if (e.target.name === 'job' || e.target.name === 'property') {
+        // Changing the job or Home/Business clears answers that belonged to the old one.
+        var stale = e.target.name === 'job' ? 'input[name="service"], input[name="rooms"]' : 'input[name="rooms"]';
+        $$(stale, form).forEach(function (i) { i.checked = false; });
         syncGroups();
       }
       render();
       if (byPointer && e.target.type === 'radio' && e.target.name !== 'contact' && e.target.name !== 'property' && stepValid()) {
         var from = at; // ignore if Continue was already pressed in the meantime
-        setTimeout(function () { if (at === from) go(at + 1); }, 220);
+        setTimeout(function () { if (at === from) go(1); }, 220);
       }
     });
 
@@ -384,7 +416,12 @@ export function initSite(): void {
     $$('[data-property]').forEach(function (a) {
       a.addEventListener('click', function () {
         var r = $('input[name="property"][value="' + a.getAttribute('data-property') + '"]', form);
-        if (r) r.checked = true;
+        if (r && !r.checked) {
+          r.checked = true;
+          $$('input[name="rooms"]', form).forEach(function (i) { i.checked = false; });
+          syncGroups();
+          render();
+        }
       });
     });
   }
