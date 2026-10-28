@@ -6,6 +6,24 @@ export function initSite(): void {
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
 
+  /* ---- Attribution ----
+     Stored on the landing page for the browser session, then sent with the
+     estimate request so GHL knows which ad, listing or page brought the lead.
+     A later visit that carries campaign tags (an ad click) replaces it. */
+  var ATTR_KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content', 'gclid', 'gbraid', 'wbraid', 'fbclid', 'msclkid'];
+  var attr = {};
+  try {
+    var qs = new URLSearchParams(location.search);
+    var tagged = ATTR_KEYS.some(function (k) { return qs.get(k); });
+    attr = JSON.parse(sessionStorage.getItem('dn_attr') || 'null');
+    if (!attr || tagged) {
+      var ref = document.referrer && document.referrer.indexOf(location.origin) !== 0 ? document.referrer : '';
+      attr = { landing_page: location.pathname + location.search, referrer: ref };
+      ATTR_KEYS.forEach(function (k) { if (qs.get(k)) attr[k] = qs.get(k); });
+      sessionStorage.setItem('dn_attr', JSON.stringify(attr));
+    }
+  } catch (err) { attr = attr || {}; }
+
   /* ---- Year ---- */
   var yr = $('#yr');
   if (yr) yr.textContent = new Date().getFullYear();
@@ -373,36 +391,93 @@ export function initSite(): void {
       }
     });
 
+    var startedAt = Date.now();
+
+    // Every answer once, multi-picks joined, so GHL gets one field per question.
+    function answers() {
+      var out = {};
+      new FormData(form).forEach(function (v, k) { out[k] = out[k] ? out[k] + ', ' + v : v; });
+      return out;
+    }
+    function labelOf(name) {
+      var i = $('input[name="' + name + '"]:checked', form);
+      var l = i && i.closest('label');
+      var b = l && ($('b', l) || $('.o-t', l) || $('span', l));
+      return b ? b.textContent.trim() : '';
+    }
+    // One plain-English line for the notification and the contact note.
+    function summary(a) {
+      var z = a.zip ? zipLookup(a.zip) : null;
+      return [
+        labelOf('property') + ' · ' + labelOf('job') + (a.service ? ': ' + a.service : ''),
+        a.rooms || a.sqft ? 'Rooms: ' + (a.rooms || 'not given') + (a.sqft ? ' (about ' + a.sqft + ' sq ft)' : '') : '',
+        a.timing ? 'Timing: ' + a.timing : '',
+        a.zip ? 'ZIP ' + a.zip + (z ? ' (' + z[0] + (z[1] ? ', in area' : ', outside usual area') + ')' : '') : '',
+        'Prefers: ' + (a.contact || 'Call'),
+        'Texts OK: ' + (a.sms_consent ? 'yes' : 'no') + ', offers OK: ' + (a.sms_marketing ? 'yes' : 'no')
+      ].filter(Boolean).join(' · ');
+    }
+    function newId() {
+      try { return crypto.randomUUID(); } catch (err) { return Date.now().toString(36) + Math.random().toString(36).slice(2, 10); }
+    }
+    function showSent(dup) {
+      $('.ok-msg', card).hidden = !!dup;
+      $('.dup-msg', card).hidden = !dup;
+      card.classList.add('is-sent');
+    }
+    var card = $('#estimate');
+
     // Sends the answers to Double N's GHL inbound webhook (set in build.py FACTS).
     // Form-encoded + no-cors: a "simple" request browsers allow cross-site without
     // a CORS preflight. Until a webhook is set, the form says so and asks people to call.
     form.addEventListener('submit', function (e) {
       e.preventDefault();
       if (!form.reportValidity()) return;
-      var card = $('#estimate');
+      var a = answers();
+      // Texting needs the consent box; nobody gets texted without it.
+      if (a.contact === 'Text' && !a.sms_consent) { showErr(form.getAttribute('data-err-sms')); return; }
+      clearErr();
+      // Bots: filled the hidden field, or finished the whole form in under 4 seconds. Look sent, send nothing.
+      if (a.company_site || Date.now() - startedAt < 4000) { showSent(false); return; }
+      delete a.company_site;
+      // Same phone again within 15 minutes (double tap, back button, resubmit): don't send a second lead.
+      var phone = (a.phone || '').replace(/\D/g, '').slice(-10), last = null;
+      try { last = JSON.parse(localStorage.getItem('dn_last') || 'null'); } catch (err) { last = null; }
+      if (last && last.phone === phone && Date.now() - last.at < 15 * 60 * 1000) { showSent(true); return; }
       var hook = form.getAttribute('data-webhook');
       if (!hook) { card.classList.add('is-offline'); return; }
+      a.submission_id = newId();
+      a.submitted_at = new Date().toISOString();
+      a.language = document.documentElement.lang || 'en';
+      a.summary = summary(a);
+      Object.keys(attr).forEach(function (k) { if (attr[k]) a[k] = attr[k]; });
       var body = new URLSearchParams();
-      new FormData(form).forEach(function (v, k) { body.append(k, v); });
+      Object.keys(a).forEach(function (k) { body.append(k, a[k]); });
       sendBtn.disabled = true;
       fetch(hook, { method: 'POST', mode: 'no-cors', body: body })
-        .then(function () { card.classList.add('is-sent'); })
+        .then(function () {
+          try { localStorage.setItem('dn_last', JSON.stringify({ phone: phone, at: Date.now() })); } catch (err) { /* private mode: no dedupe, still sent */ }
+          showSent(false);
+        })
         .catch(function () { sendBtn.disabled = false; card.classList.add('is-offline'); });
     });
 
     // ZIP check: Georgia ZIP -> city, and whether it's in the usual service area.
     // ponytail: static table (GeoNames, Georgia only, ~19 KB) instead of an API call.
     var zipEl = $('#q-zip', form), zipNote = $('.zip-note', form), zipMap = null;
+    function zipLookup(z) {
+      if (!zipMap) {
+        zipMap = {};
+        GA_ZIPS.split('|').forEach(function (r) { var p = r.split(':'); zipMap[p[0]] = [p[1], p[2] === '1']; });
+      }
+      return zipMap[z];
+    }
     if (zipEl && zipNote) {
       zipEl.addEventListener('input', function () {
         var z = zipEl.value.replace(/\D/g, '').slice(0, 5);
         if (zipEl.value !== z) zipEl.value = z;
         if (z.length < 5) { zipNote.textContent = ''; zipNote.className = 'zip-note'; return; }
-        if (!zipMap) {
-          zipMap = {};
-          GA_ZIPS.split('|').forEach(function (r) { var p = r.split(':'); zipMap[p[0]] = [p[1], p[2] === '1']; });
-        }
-        var hit = zipMap[z];
+        var hit = zipLookup(z);
         var key = !hit ? 'data-zip-out' : hit[1] ? 'data-zip-in' : 'data-zip-near';
         zipNote.textContent = form.getAttribute(key).replace('{city}', hit ? hit[0] : '');
         zipNote.className = 'zip-note ' + (!hit ? 'is-out' : hit[1] ? 'is-in' : 'is-near');
