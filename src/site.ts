@@ -450,6 +450,12 @@ export function initSite(): void {
       a.submitted_at = new Date().toISOString();
       a.language = document.documentElement.lang || 'en';
       a.summary = summary(a);
+      a.job_phrase = { install: 'your new flooring', refinish: 'your floor repair or refresh', clean: 'your cleaning' }[a.job] || '';
+      // Proof of consent: the exact words the visitor ticked, and when.
+      if (a.sms_consent) {
+        a.consent_text = $('input[name="sms_consent"]', form).closest('label').textContent.trim();
+        a.consent_timestamp = a.submitted_at;
+      }
       Object.keys(attr).forEach(function (k) { if (attr[k]) a[k] = attr[k]; });
       var body = new URLSearchParams();
       Object.keys(a).forEach(function (k) { body.append(k, a[k]); });
