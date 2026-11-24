@@ -450,7 +450,14 @@ export function initSite(): void {
       a.submitted_at = new Date().toISOString();
       a.language = document.documentElement.lang || 'en';
       a.summary = summary(a);
-      a.job_phrase = { install: 'your new flooring', refinish: 'your floor repair or refresh', clean: 'your cleaning' }[a.job] || '';
+      // Phrase for texts ("Got your request for ..."), in the page's language.
+      a.job_phrase = (a.language === 'es'
+        ? { install: 'su piso nuevo', refinish: 'la reparación o renovación de su piso', clean: 'su limpieza' }
+        : { install: 'your new flooring', refinish: 'your floor repair or refresh', clean: 'your cleaning' })[a.job] || '';
+      // Texts greet by first name, but the form has one name box.
+      var nm = (a.name || '').trim().split(/\s+/);
+      a.first_name = nm[0] || '';
+      a.last_name = nm.slice(1).join(' ');
       // Proof of consent: the exact words the visitor ticked, and when.
       if (a.sms_consent) {
         a.consent_text = $('input[name="sms_consent"]', form).closest('label').textContent.trim();
