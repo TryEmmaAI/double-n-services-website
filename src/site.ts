@@ -454,10 +454,12 @@ export function initSite(): void {
       a.job_phrase = (a.language === 'es'
         ? { install: 'su piso nuevo', refinish: 'la reparación o renovación de su piso', clean: 'su limpieza' }
         : { install: 'your new flooring', refinish: 'your floor repair or refresh', clean: 'your cleaning' })[a.job] || '';
-      // Texts greet by first name, but the form has one name box.
-      var nm = (a.name || '').trim().split(/\s+/);
-      a.first_name = nm[0] || '';
-      a.last_name = nm.slice(1).join(' ');
+      // Two name boxes; if the whole name went in the first one, split it there.
+      var first = (a.first_name || '').trim(), last = (a.last_name || '').trim();
+      if (!last) { var nm = first.split(/\s+/); first = nm[0] || ''; last = nm.slice(1).join(' '); }
+      a.first_name = first;
+      a.last_name = last;
+      a.name = (first + ' ' + last).trim();
       // Proof of consent: the exact words the visitor ticked, and when.
       if (a.sms_consent) {
         a.consent_text = $('input[name="sms_consent"]', form).closest('label').textContent.trim();
